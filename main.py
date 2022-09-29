@@ -55,7 +55,7 @@ SCREEN = pygame.display.set_mode((WIDTH, HEIGHT))
 pygame.display.set_caption("Q-LESS")
 
 
-TEST_LIST = []
+
 
 
 IMG1= pygame.transform.scale(pygame.image.load(os.path.join('images','{}.png'.format(LETTER_list[0]))),(100,100))
@@ -71,7 +71,7 @@ IMG4 = pygame.transform.scale(pygame.image.load(os.path.join('images','{}.png'.f
 LETTER4 = pygame.transform.scale(pygame.image.load(os.path.join('images','{}.png'.format(LETTER_list[3]))),(50,50))
 
 IMG5 = pygame.transform.scale(pygame.image.load(os.path.join('images','{}.png'.format(LETTER_list[4]))),(100,100))
-LETTER5 = pygame.transform.scale(pygame.image.load(os.path.join('images','{}.png'.format(LETTER_list[5]))),(50,50))
+LETTER5 = pygame.transform.scale(pygame.image.load(os.path.join('images','{}.png'.format(LETTER_list[4]))),(50,50))
 
 IMG6 = pygame.transform.scale(pygame.image.load(os.path.join('images','{}.png'.format(LETTER_list[5]))),(100,100))
 LETTER6 = pygame.transform.scale(pygame.image.load(os.path.join('images','{}.png'.format(LETTER_list[5]))),(50,50))
@@ -94,6 +94,7 @@ IMG11 = pygame.transform.scale(pygame.image.load(os.path.join('images','{}.png'.
 LETTER12 = pygame.transform.scale(pygame.image.load(os.path.join('images','{}.png'.format(LETTER_list[11]))),(50,50))
 IMG12 = pygame.transform.scale(pygame.image.load(os.path.join('images','{}.png'.format(LETTER_list[11]))),(100,100))
 
+TEST_DICT = {}
 #TEST_LIST = [LETTER1,LETTER2]
 
 
@@ -107,6 +108,7 @@ class DragOperator:
         check_group = pygame.sprite.Group([letter for letter in group if letter != self.rect])
         if pygame.sprite.spritecollide(self, check_group, False):
             print("test")
+            print()
     
     def update(self, event_list):
         DragOperator.collisioncheck(self)
@@ -115,6 +117,7 @@ class DragOperator:
             if event.type == pygame.MOUSEBUTTONDOWN:
                 self.dragging = self.rect.collidepoint(event.pos)
                 self.rel_pos = event.pos[0] - self.rect.x, event.pos[1] - self.rect.y
+                
                 
             if event.type == pygame.MOUSEBUTTONUP:
                 self.dragging = False
@@ -131,12 +134,10 @@ class SpriteObject(pygame.sprite.Sprite):
         super().__init__() 
         
         
-        #self.original_image = pygame.Surface((50, 50), pygame.SRCALPHA)
+
         self.original_image = img
         pygame.draw.rect(self.original_image, (0,0,0), (100, 100, 100, 100))
         self.drag_image = pygame.Surface((300, 300), pygame.SRCALPHA)
-        #pygame.draw.rect(self.drag_image,(100, 100, 100, 100))
-        #pygame.draw.rect(self.drag_image,(100, 100, 100, 100), 4)
         self.image = self.original_image 
         self.rect = self.original_image.get_rect(center = (x, y))
         self.drag = DragOperator(self.rect)
@@ -219,7 +220,7 @@ def main():
                 running = False
         group.update(event_list)
 
-        SCREEN.fill(WHITE)
+        SCREEN.fill(GRAY)
         group.draw(SCREEN)
         pygame.display.flip()
 
