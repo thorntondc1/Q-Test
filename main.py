@@ -102,18 +102,26 @@ class DragOperator:
         self.rect = rect
         self.dragging = False
         self.rel_pos = (0,0)
+
+    def collisioncheck(self):
+        check_group = pygame.sprite.Group([letter for letter in group if letter != self.rect])
+        if pygame.sprite.spritecollide(self, check_group, False):
+            print("test")
     
     def update(self, event_list):
+        DragOperator.collisioncheck(self)
         for event in event_list:
+        
             if event.type == pygame.MOUSEBUTTONDOWN:
                 self.dragging = self.rect.collidepoint(event.pos)
                 self.rel_pos = event.pos[0] - self.rect.x, event.pos[1] - self.rect.y
+                
             if event.type == pygame.MOUSEBUTTONUP:
                 self.dragging = False
             if event.type == pygame.MOUSEMOTION and self.dragging:
                 self.rect.topleft = event.pos[0] - self.rel_pos[0], event.pos[1] - self.rel_pos[1]
 
-
+ 
 
 
 class SpriteObject(pygame.sprite.Sprite):
@@ -125,9 +133,6 @@ class SpriteObject(pygame.sprite.Sprite):
         
         #self.original_image = pygame.Surface((50, 50), pygame.SRCALPHA)
         self.original_image = img
-      
-
-
         pygame.draw.rect(self.original_image, (0,0,0), (100, 100, 100, 100))
         self.drag_image = pygame.Surface((300, 300), pygame.SRCALPHA)
         #pygame.draw.rect(self.drag_image,(100, 100, 100, 100))
@@ -141,25 +146,12 @@ class SpriteObject(pygame.sprite.Sprite):
         self.drag.update(event_list) 
         self.image = self.image if self.drag.dragging else self.original_image
 
-        #self.mask = pygame.mask.from_surface(self.block_img)
+
+
        
-
-       
-    def draw(self,block_img,rect):
-        SCREEN.blit(self.block_img, (self.x, self.y))
-        #pygame.draw.rect(SCREEN, GRAY,self.rect,3)
-        #SCREEN.blit(self.block_img,self.rect)
-
-
-     #may need these to make sure that users cannot move letters offscreen. Will be added once mouseclick is resolved.    
-    def get_width(self):
-        return self.block_img.get_width()
-
-    def get_height(self):
-        return self.block_img.get_height()
 
 group = pygame.sprite.Group([
-    #SpriteObject(SCREEN.get_width() // 3, SCREEN.get_height() // 3, LETTER1),
+
     SpriteObject(80, 500, LETTER1),
     SpriteObject(140,500, LETTER2),
     SpriteObject(200,500,LETTER3),
@@ -173,6 +165,8 @@ group = pygame.sprite.Group([
     SpriteObject(680,500, LETTER11),
     SpriteObject(740,500, LETTER12)
 ])
+
+
 
 
 def main():
@@ -191,6 +185,8 @@ def main():
     #L2 = Block(200,400,IMG2)
     
     
+    
+
     
     def redraw_window():
         SCREEN.fill(WHITE)
