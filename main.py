@@ -16,10 +16,10 @@ GRAY = (110,110,110)
 GREEN = (0,255,0)
 WHITE = (255,255,255)
 BLUE = (0, 0, 255)
+RED = (255,0,0)
 
 
 #Create blocks 
-#I wanted to keep it as close to the original game as possible 
 BLOCK1 = ['O','O','A','A','E','E']
 BLOCK2 = ['O','U','U','A','E','I']
 BLOCK3 = ['T','J','C','D','C','B']
@@ -97,20 +97,18 @@ class DragOperator:
         
     
 
-    def collisioncheck(self):
-        check_group = pygame.sprite.Group([letter for letter in group if letter != self.rect])
-        if pygame.sprite.spritecollideany(self, check_group):
+    
+              
             #pygame.draw.rect(self, GREEN, self.rect,6)
-            self.dragging = False
-        
-            print(check_group)
-            print("test")
+                       
+          
 
     def movementupdate(self, event_list):
 
-        DragOperator.collisioncheck(self)
+        
         
         for event in event_list:
+            
             if event.type == pygame.MOUSEBUTTONDOWN:
                 self.dragging = self.rect.collidepoint(event.pos)
                 self.rel_pos = event.pos[0] - self.rect.x, event.pos[1] - self.rect.y
@@ -137,16 +135,28 @@ class SpriteObject(pygame.sprite.Sprite):
         
 
         self.original_image = img
-        pygame.draw.rect(self.original_image, BLUE, self.original_image.get_rect(),3)
+        self.test = pygame.draw.rect(self.original_image, BLUE, self.original_image.get_rect(),3)
         self.drag_image = pygame.Surface((300, 300), pygame.SRCALPHA)
         self.image = self.original_image 
         self.rect = self.original_image.get_rect(center = (x, y))
-
         self.drag = DragOperator(self.rect)
     
+
+    def collisioncheck(self):
+        check_group = pygame.sprite.Group([letter for letter in group if letter != self.rect])
+        if pygame.sprite.spritecollideany(self, check_group):
+            self.test = pygame.draw.rect(self.original_image, BLUE, self.original_image.get_rect(),3)
+        else:
+             self.test = pygame.draw.rect(self.original_image, RED, self.original_image.get_rect(),3)
+
+
+        
+            #self.test = pygame.draw.rect(self.original_image, GRAY, self.original_image.get_rect(),3)
+        
        
     def update(self, event_list):
         self.drag.movementupdate(event_list) 
+        SpriteObject.collisioncheck(self)
         #self.image = self.image if self.drag.dragging else self.original_image
 
 
@@ -176,7 +186,8 @@ for key, value in zip(group,LETTER_LIST):
     TEST_DICT[key] = value
 
 
-print(TEST_DICT)
+print(TEST_DICT[key])
+print(group)
 
 def main():
     running = True
