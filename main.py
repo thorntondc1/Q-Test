@@ -1,3 +1,4 @@
+from multiprocessing.connection import wait
 import pygame
 import os
 from pygame.locals import *
@@ -45,6 +46,12 @@ pygame.init()
 
 
 
+
+
+SCREEN = pygame.display.set_mode((WIDTH, HEIGHT))
+pygame.display.set_caption("Q-LESS")
+
+
 def genBlocks():
         for block in BLOCK_LIST:
             LETTER_LIST.append(random.choice(block))
@@ -52,14 +59,8 @@ def genBlocks():
 
 genBlocks()
 
-SCREEN = pygame.display.set_mode((WIDTH, HEIGHT))
-pygame.display.set_caption("Q-LESS")
 
-
-
-
-
-LETTER1= pygame.transform.scale(pygame.image.load(os.path.join('images','{}.png'.format(LETTER_LIST[0]))),(50,50))
+LETTER1 = pygame.transform.scale(pygame.image.load(os.path.join('images','{}.png'.format(LETTER_LIST[0]))),(50,50))
 
 LETTER2= pygame.transform.scale(pygame.image.load(os.path.join('images','{}.png'.format(LETTER_LIST[1]))),(50,50))
 
@@ -84,33 +85,46 @@ LETTER11 = pygame.transform.scale(pygame.image.load(os.path.join('images','{}.pn
 LETTER12 = pygame.transform.scale(pygame.image.load(os.path.join('images','{}.png'.format(LETTER_LIST[11]))),(50,50))
 
 
+
+
+
+
 class DragOperator:
     def __init__(self,rect) :
         self.rect = rect
         self.dragging = False
         self.rel_pos = (0,0)
         
+    
+
     def collisioncheck(self):
         check_group = pygame.sprite.Group([letter for letter in group if letter != self.rect])
-        if pygame.sprite.spritecollide(self, check_group, False):
-#            pygame.draw.rect(self, GREEN, self.rect,6)
+        if pygame.sprite.spritecollideany(self, check_group):
+            #pygame.draw.rect(self, GREEN, self.rect,6)
+            self.dragging = False
+        
+            print(check_group)
             print("test")
-      
-
-
 
     def movementupdate(self, event_list):
+
         DragOperator.collisioncheck(self)
+        
         for event in event_list:
             if event.type == pygame.MOUSEBUTTONDOWN:
                 self.dragging = self.rect.collidepoint(event.pos)
                 self.rel_pos = event.pos[0] - self.rect.x, event.pos[1] - self.rect.y
-                
-                
-            if event.type == pygame.MOUSEBUTTONUP:
-                self.dragging = False
-            if event.type == pygame.MOUSEMOTION and self.dragging:
+
+            elif event.type == pygame.MOUSEMOTION and self.dragging:
                 self.rect.topleft = event.pos[0] - self.rel_pos[0], event.pos[1] - self.rel_pos[1]
+            
+                
+            elif event.type == pygame.MOUSEBUTTONUP:
+                self.dragging = False
+            
+    
+   
+      
 
  
 
@@ -136,9 +150,6 @@ class SpriteObject(pygame.sprite.Sprite):
         #self.image = self.image if self.drag.dragging else self.original_image
 
 
-
-       
-
 group = pygame.sprite.Group([
 
     SpriteObject(80, 500, LETTER1),
@@ -155,6 +166,9 @@ group = pygame.sprite.Group([
     SpriteObject(740,500, LETTER12)
 ])
 
+       
+
+
 
 TEST_DICT = {}
 
@@ -166,36 +180,13 @@ print(TEST_DICT)
 
 def main():
     running = True
-    moving = False
-    FPS = 60
-    GAMEFONT = pygame.font.SysFont('comicsans',25)
+    
     print(LETTER_LIST)
     
     clock = pygame.time.Clock()
     
-    
-    def redraw_window():
-        SCREEN.fill(WHITE)
-        #L1.draw(SCREEN)
-        SCREEN.blit(IMG1,LETTER1)
-        pygame.draw.rect(SCREEN, GRAY,LETTER1,3)
-
-        SCREEN.blit(IMG2,LETTER2)
-        pygame.draw.rect(SCREEN, GRAY,LETTER2,3)
-
-        #L2.draw(SCREEN)
-        #Draw Text 
-        heading_surface = GAMEFONT.render("Letters",1,(0,0,0))
-        letter_surface = GAMEFONT.render(', '.join(LETTER_LIST),1,(0,0,0))
-        SCREEN.blit(heading_surface,(300,50))
-        #SCREEN.blit(letter_surface,(170,90))
-       
-        pygame.display.update()
-    
     while running:
         
-        clock.tick(FPS)
-        #redraw_window()
         event_list = pygame.event.get()
         for event in event_list:
             if event.type == pygame.QUIT:
