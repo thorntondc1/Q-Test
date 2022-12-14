@@ -1,11 +1,11 @@
-import pygame
 import os
+import pygame as pg
 from pygame.locals import *
 import random
 import urllib.request
 from bs4 import BeautifulSoup
 
-pygame.font.init()
+pg.font.init()
 
 
 WIDTH = 800
@@ -42,65 +42,68 @@ BLOCK_LIST=[BLOCK1,BLOCK2,BLOCK3,BLOCK4,BLOCK5,BLOCK6,
 
 
 
-pygame.init()
+pg.init()
 
 
 
 
 
-SCREEN = pygame.display.set_mode((WIDTH, HEIGHT))
-pygame.display.set_caption("QLess-Test")
+SCREEN = pg.display.set_mode((WIDTH, HEIGHT))
+pg.display.set_caption("QLess-Test")
 
 
-def genBlocks():
+
+def gen_blocks():
         for block in BLOCK_LIST:
             LETTER_LIST.append(random.choice(block))
             
 
-genBlocks()
+gen_blocks()
 
 
-LETTER1 = pygame.transform.scale(pygame.image.load(os.path.join('images','{}.png'.format(LETTER_LIST[0]))),(50,50))
+bg = pg.image.load(os.path.join('images','background.jpg'))
 
-LETTER2= pygame.transform.scale(pygame.image.load(os.path.join('images','{}.png'.format(LETTER_LIST[1]))),(50,50))
+LETTER1 = pg.transform.scale(pg.image.load(os.path.join('images','{}.png'.format(LETTER_LIST[0]))),(50,50))
 
-LETTER3 = pygame.transform.scale(pygame.image.load(os.path.join('images','{}.png'.format(LETTER_LIST[2]))),(50,50))
+LETTER2= pg.transform.scale(pg.image.load(os.path.join('images','{}.png'.format(LETTER_LIST[1]))),(50,50))
 
-LETTER4 = pygame.transform.scale(pygame.image.load(os.path.join('images','{}.png'.format(LETTER_LIST[3]))),(50,50))
+LETTER3 = pg.transform.scale(pg.image.load(os.path.join('images','{}.png'.format(LETTER_LIST[2]))),(50,50))
 
-LETTER5 = pygame.transform.scale(pygame.image.load(os.path.join('images','{}.png'.format(LETTER_LIST[4]))),(50,50))
+LETTER4 = pg.transform.scale(pg.image.load(os.path.join('images','{}.png'.format(LETTER_LIST[3]))),(50,50))
 
-LETTER6 = pygame.transform.scale(pygame.image.load(os.path.join('images','{}.png'.format(LETTER_LIST[5]))),(50,50))
+LETTER5 = pg.transform.scale(pg.image.load(os.path.join('images','{}.png'.format(LETTER_LIST[4]))),(50,50))
 
-LETTER7 = pygame.transform.scale(pygame.image.load(os.path.join('images','{}.png'.format(LETTER_LIST[6]))),(50,50))
+LETTER6 = pg.transform.scale(pg.image.load(os.path.join('images','{}.png'.format(LETTER_LIST[5]))),(50,50))
 
-LETTER8 = pygame.transform.scale(pygame.image.load(os.path.join('images','{}.png'.format(LETTER_LIST[7]))),(50,50))
+LETTER7 = pg.transform.scale(pg.image.load(os.path.join('images','{}.png'.format(LETTER_LIST[6]))),(50,50))
 
-LETTER9 = pygame.transform.scale(pygame.image.load(os.path.join('images','{}.png'.format(LETTER_LIST[8]))),(50,50))
+LETTER8 = pg.transform.scale(pg.image.load(os.path.join('images','{}.png'.format(LETTER_LIST[7]))),(50,50))
 
-LETTER10 = pygame.transform.scale(pygame.image.load(os.path.join('images','{}.png'.format(LETTER_LIST[9]))),(50,50))
+LETTER9 = pg.transform.scale(pg.image.load(os.path.join('images','{}.png'.format(LETTER_LIST[8]))),(50,50))
 
-LETTER11 = pygame.transform.scale(pygame.image.load(os.path.join('images','{}.png'.format(LETTER_LIST[10]))),(50,50))
+LETTER10 = pg.transform.scale(pg.image.load(os.path.join('images','{}.png'.format(LETTER_LIST[9]))),(50,50))
 
-LETTER12 = pygame.transform.scale(pygame.image.load(os.path.join('images','{}.png'.format(LETTER_LIST[11]))),(50,50))
+LETTER11 = pg.transform.scale(pg.image.load(os.path.join('images','{}.png'.format(LETTER_LIST[10]))),(50,50))
+
+LETTER12 = pg.transform.scale(pg.image.load(os.path.join('images','{}.png'.format(LETTER_LIST[11]))),(50,50))
 
 
 
         
 
 
-class SpriteObject(pygame.sprite.Sprite):
+class SpriteObject(pg.sprite.Sprite):
     def __init__(self,x,y,img,name):
         #self.x = x
         #self.y = y
         self.name = name
         super().__init__() 
         self.original_image = img
-        self.test = pygame.draw.rect(self.original_image, BLUE, self.original_image.get_rect(),3)
-        self.drag_image = pygame.Surface((300, 300), pygame.SRCALPHA)
+        self.test = pg.draw.rect(self.original_image, BLUE, self.original_image.get_rect(),3)
+        self.drag_image = pg.Surface((300, 300), pg.SRCALPHA)
         self.image = self.original_image 
         self.rect = self.original_image.get_rect(center = (x, y))
-        self.drag = DragOperator(self.rect)
+        self.drag = Gameplay(self.rect)
 
 
     def wall_collision_check(self):
@@ -118,54 +121,63 @@ class SpriteObject(pygame.sprite.Sprite):
 
 
 
-    def collisioncheck(self):
-        collision_tolerance = 5
+    def collision_check(self):
+        collision_tolerance = 10
 
-
-        check_group = pygame.sprite.Group([letter for letter in group if letter != self.rect])
-        if pygame.sprite.spritecollideany(self, check_group):
-            self.test = pygame.draw.rect(self.original_image, RED, self.original_image.get_rect(),3)
+        check_group = pg.sprite.Group([letter for letter in group if letter != self.rect])
+        if pg.sprite.spritecollideany(self, check_group):
+            self.test = pg.draw.rect(self.original_image, RED, self.original_image.get_rect(),3)
             for i in check_group:
                 if self.rect.colliderect(i):
                     if abs(self.rect.right - i.rect.left) <= collision_tolerance:
                         self.rect.right = i.rect.left
+                    
+                        #self.rect.midright = i.rect.midleft
+                        #self.rect.bottomright = i.rect.bottomleft
 
                     elif abs(self.rect.left - i.rect.right) <= collision_tolerance:
                         self.rect.left = i.rect.right
+            
+                        #self.rect.midleft = i.rect.midright
+                        #self.rect.bottomleft = i.rect.bottomright
                     
                     elif abs(self.rect.top - i.rect.bottom) <= collision_tolerance:
                         self.rect.top = i.rect.bottom
+                        #self.rect.midtop = i.rect.midbottom
+                        #self.rect.topleft = i.rect.bottomleft
                     
                     elif abs(self.rect.bottom - i.rect.top) <= collision_tolerance:
                         self.rect.bottom = i.rect.top
+                        #self.rect.midbottom = i.rect.midtop
+                        #self.rect.bottomleft = i.rect.topleft
                         
-                            
-                   
-
-            
-
-
-
-
-          
-
-      
-
+              
         else:
-            self.test = pygame.draw.rect(self.original_image, BLUE, self.original_image.get_rect(),3)        
-            #self.test = pygame.draw.rect(self.original_image, GRAY, self.original_image.get_rect(),3)
+            self.test = pg.draw.rect(self.original_image, BLUE, self.original_image.get_rect(),3)        
+            #self.test = pg.draw.rect(self.original_image, GRAY, self.original_image.get_rect(),3)
         #print(test)
+
+
+
+    
+    def word_checker(self):
+        for i in group:
+            if self != i and self.rect.colliderect(i.rect):
+                print(i.name)
 
 
 
 
     def update(self, event_list):
         SpriteObject.wall_collision_check(self)
-        SpriteObject.collisioncheck(self)
-        self.drag.movementupdate(event_list) 
+        SpriteObject.collision_check(self)
+        self.drag.movement_update(event_list) 
+        SpriteObject.word_checker(self)
+        Gameplay.check_word()
         
         
-        
+    
+
         
   
 
@@ -173,31 +185,37 @@ class SpriteObject(pygame.sprite.Sprite):
 
 
 
-class DragOperator:
+class Gameplay:
     def __init__(self,rect) :
         self.rect = rect
         self.dragging = False
         self.rel_pos = (0,0)
                        
-          
-
-    def movementupdate(self, event_list):
+    def movement_update(self, event_list):
         for event in event_list:
             
-            if event.type == pygame.MOUSEBUTTONDOWN:
+            if event.type == pg.MOUSEBUTTONDOWN:
                 self.dragging = self.rect.collidepoint(event.pos)
                 self.rel_pos = event.pos[0] - self.rect.x, event.pos[1] - self.rect.y
 
-            elif event.type == pygame.MOUSEMOTION and self.dragging:
+            elif event.type == pg.MOUSEMOTION and self.dragging:
                 self.rect.topleft = event.pos[0] - self.rel_pos[0], event.pos[1] - self.rel_pos[1]
             
                 
-            elif event.type == pygame.MOUSEBUTTONUP:
+            elif event.type == pg.MOUSEBUTTONUP:
                 self.dragging = False
             
+    def reset_game():
+        pass
+
+    def win_condition_check():
+        pass
+
+    def check_word():
+        pass
 
 
-group = pygame.sprite.Group([
+group = pg.sprite.Group([
 
     SpriteObject(80, 500, LETTER1, LETTER_LIST[0]),
     SpriteObject(140,500, LETTER2, LETTER_LIST[1]),
@@ -222,19 +240,20 @@ def main():
     
     print(LETTER_LIST)
     
-    clock = pygame.time.Clock()
+    clock = pg.time.Clock()
     
     while running:
         
-        event_list = pygame.event.get()
+        event_list = pg.event.get()
         for event in event_list:
-            if event.type == pygame.QUIT:
+            if event.type == pg.QUIT:
                 running = False
         group.update(event_list)
 
         SCREEN.fill(GRAY)
+        SCREEN.blit(bg,(0,0))
         group.draw(SCREEN)
-        pygame.display.flip()
+        pg.display.flip()
 
                 
 
