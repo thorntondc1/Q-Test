@@ -1,8 +1,8 @@
-from multiprocessing.connection import wait
 import pygame
 import os
 from pygame.locals import *
-import random, urllib.request
+import random
+import urllib.request
 from bs4 import BeautifulSoup
 
 pygame.font.init()
@@ -49,7 +49,7 @@ pygame.init()
 
 
 SCREEN = pygame.display.set_mode((WIDTH, HEIGHT))
-pygame.display.set_caption("Q-LESS")
+pygame.display.set_caption("QLess-Test")
 
 
 def genBlocks():
@@ -86,6 +86,90 @@ LETTER12 = pygame.transform.scale(pygame.image.load(os.path.join('images','{}.pn
 
 
 
+        
+
+
+class SpriteObject(pygame.sprite.Sprite):
+    def __init__(self,x,y,img,name):
+        #self.x = x
+        #self.y = y
+        self.name = name
+        super().__init__() 
+        self.original_image = img
+        self.test = pygame.draw.rect(self.original_image, BLUE, self.original_image.get_rect(),3)
+        self.drag_image = pygame.Surface((300, 300), pygame.SRCALPHA)
+        self.image = self.original_image 
+        self.rect = self.original_image.get_rect(center = (x, y))
+        self.drag = DragOperator(self.rect)
+
+
+    def wall_collision_check(self):
+        if self.rect.right >= WIDTH:
+            self.rect.right = WIDTH
+
+        elif self.rect.left <=0:
+            self.rect.left = 0
+
+        elif self.rect.bottom >= HEIGHT:
+            self.rect.bottom = HEIGHT
+
+        elif self.rect.top <=0:
+            self.rect.top = 0
+
+
+
+    def collisioncheck(self):
+        collision_tolerance = 5
+
+
+        check_group = pygame.sprite.Group([letter for letter in group if letter != self.rect])
+        if pygame.sprite.spritecollideany(self, check_group):
+            self.test = pygame.draw.rect(self.original_image, RED, self.original_image.get_rect(),3)
+            for i in check_group:
+                if self.rect.colliderect(i):
+                    if abs(self.rect.right - i.rect.left) <= collision_tolerance:
+                        self.rect.right = i.rect.left
+
+                    elif abs(self.rect.left - i.rect.right) <= collision_tolerance:
+                        self.rect.left = i.rect.right
+                    
+                    elif abs(self.rect.top - i.rect.bottom) <= collision_tolerance:
+                        self.rect.top = i.rect.bottom
+                    
+                    elif abs(self.rect.bottom - i.rect.top) <= collision_tolerance:
+                        self.rect.bottom = i.rect.top
+                        
+                            
+                   
+
+            
+
+
+
+
+          
+
+      
+
+        else:
+            self.test = pygame.draw.rect(self.original_image, BLUE, self.original_image.get_rect(),3)        
+            #self.test = pygame.draw.rect(self.original_image, GRAY, self.original_image.get_rect(),3)
+        #print(test)
+
+
+
+
+    def update(self, event_list):
+        SpriteObject.wall_collision_check(self)
+        SpriteObject.collisioncheck(self)
+        self.drag.movementupdate(event_list) 
+        
+        
+        
+        
+  
+
+            
 
 
 
@@ -94,19 +178,10 @@ class DragOperator:
         self.rect = rect
         self.dragging = False
         self.rel_pos = (0,0)
-        
-    
-
-    
-              
-            #pygame.draw.rect(self, GREEN, self.rect,6)
                        
           
 
     def movementupdate(self, event_list):
-
-        
-        
         for event in event_list:
             
             if event.type == pygame.MOUSEBUTTONDOWN:
@@ -120,74 +195,27 @@ class DragOperator:
             elif event.type == pygame.MOUSEBUTTONUP:
                 self.dragging = False
             
-    
-   
-      
-
- 
-
-
-class SpriteObject(pygame.sprite.Sprite):
-    def __init__(self,x,y,img):
-        self.x = x
-        self.y = y
-        super().__init__() 
-        
-
-        self.original_image = img
-        self.test = pygame.draw.rect(self.original_image, BLUE, self.original_image.get_rect(),3)
-        self.drag_image = pygame.Surface((300, 300), pygame.SRCALPHA)
-        self.image = self.original_image 
-        self.rect = self.original_image.get_rect(center = (x, y))
-        self.drag = DragOperator(self.rect)
-    
-
-    def collisioncheck(self):
-        check_group = pygame.sprite.Group([letter for letter in group if letter != self.rect])
-        if pygame.sprite.spritecollideany(self, check_group):
-            self.test = pygame.draw.rect(self.original_image, BLUE, self.original_image.get_rect(),3)
-        else:
-             self.test = pygame.draw.rect(self.original_image, RED, self.original_image.get_rect(),3)
-
-
-        
-            #self.test = pygame.draw.rect(self.original_image, GRAY, self.original_image.get_rect(),3)
-        
-       
-    def update(self, event_list):
-        self.drag.movementupdate(event_list) 
-        SpriteObject.collisioncheck(self)
-        #self.image = self.image if self.drag.dragging else self.original_image
 
 
 group = pygame.sprite.Group([
 
-    SpriteObject(80, 500, LETTER1),
-    SpriteObject(140,500, LETTER2),
-    SpriteObject(200,500, LETTER3),
-    SpriteObject(260,500, LETTER4),
-    SpriteObject(320,500, LETTER5),
-    SpriteObject(380,500, LETTER6),
-    SpriteObject(440,500, LETTER7),
-    SpriteObject(500,500, LETTER8),
-    SpriteObject(560,500, LETTER9),
-    SpriteObject(620,500, LETTER10),
-    SpriteObject(680,500, LETTER11),
-    SpriteObject(740,500, LETTER12)
+    SpriteObject(80, 500, LETTER1, LETTER_LIST[0]),
+    SpriteObject(140,500, LETTER2, LETTER_LIST[1]),
+    SpriteObject(200,500, LETTER3, LETTER_LIST[2]),
+    SpriteObject(260,500, LETTER4, LETTER_LIST[3]),
+    SpriteObject(320,500, LETTER5, LETTER_LIST[4]),
+    SpriteObject(380,500, LETTER6, LETTER_LIST[5]),
+    SpriteObject(440,500, LETTER7,LETTER_LIST[6]),
+    SpriteObject(500,500, LETTER8, LETTER_LIST[7]),
+    SpriteObject(560,500, LETTER9, LETTER_LIST[8]),
+    SpriteObject(620,500, LETTER10, LETTER_LIST[9]),
+    SpriteObject(680,500, LETTER11, LETTER_LIST[10]),
+    SpriteObject(740,500, LETTER12, LETTER_LIST[11])
 ])
 
        
 
 
-
-TEST_DICT = {}
-
-for key, value in zip(group,LETTER_LIST):
-    TEST_DICT[key] = value
-
-
-print(TEST_DICT[key])
-print(group)
 
 def main():
     running = True
