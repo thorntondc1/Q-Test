@@ -1,6 +1,5 @@
 import os
 import pygame as pg
-from pygame.locals import *
 import random
 import urllib.request
 from bs4 import BeautifulSoup
@@ -9,7 +8,14 @@ pg.font.init()
 
 
 WIDTH = 800
-HEIGHT = 600
+HEIGHT = 700
+MARGIN = 2  #distance between grid squares 
+MARGIN2 = 525 // 10 #~ width of the grid // by the # of squares 
+
+cell_w = 50
+cell_h = 50
+#rows = 8
+#columns = 8
 
 BLACK = (0,0,0)
 GRAY = (110,110,110)
@@ -40,12 +46,21 @@ LETTER_LIST =  []
 BLOCK_LIST=[BLOCK1,BLOCK2,BLOCK3,BLOCK4,BLOCK5,BLOCK6,
     BLOCK7,BLOCK8,BLOCK9,BLOCK10,BLOCK11,BLOCK12]
 
+grid = []
 
+grid2 = [[0,0,0,0,0,0,0,0,0,0],
+         [0,0,0,0,0,0,0,0,0,0],
+         [0,0,0,0,0,0,0,0,0,0],
+         [0,0,0,0,0,0,0,0,0,0],
+         [0,0,0,0,0,0,0,0,0,0],
+         [0,0,0,0,0,0,0,0,0,0],
+         [0,0,0,0,0,0,0,0,0,0],
+         [0,0,0,0,0,0,0,0,0,0],
+         [0,0,0,0,0,0,0,0,0,0],
+         [0,0,0,0,0,0,0,0,0,0]]
+# will remove grid2 eventually. Using for testing
 
 pg.init()
-
-
-
 
 
 SCREEN = pg.display.set_mode((WIDTH, HEIGHT))
@@ -89,20 +104,17 @@ LETTER12 = pg.transform.scale(pg.image.load(os.path.join('images','{}.png'.forma
 
 
 
-        
-
-
 class SpriteObject(pg.sprite.Sprite):
     def __init__(self,x,y,img,name):
-        #self.x = x
-        #self.y = y
+        self.x = x
+        self.y = y
         self.name = name
         super().__init__() 
         self.original_image = img
-        self.test = pg.draw.rect(self.original_image, BLUE, self.original_image.get_rect(),3)
+        self.test = pg.draw.rect(self.original_image, BLUE, self.original_image.get_rect(),5)
         self.drag_image = pg.Surface((300, 300), pg.SRCALPHA)
         self.image = self.original_image 
-        self.rect = self.original_image.get_rect(center = (x, y))
+        self.rect = self.original_image.get_rect(center = (self.x, self.y))
         self.drag = Gameplay(self.rect)
 
 
@@ -123,15 +135,15 @@ class SpriteObject(pg.sprite.Sprite):
 
     def collision_check(self):
         collision_tolerance = 10
-
         check_group = pg.sprite.Group([letter for letter in group if letter != self.rect])
         if pg.sprite.spritecollideany(self, check_group):
             self.test = pg.draw.rect(self.original_image, RED, self.original_image.get_rect(),3)
             for i in check_group:
                 if self.rect.colliderect(i):
                     if abs(self.rect.right - i.rect.left) <= collision_tolerance:
-                        self.rect.right = i.rect.left
-                    
+                        
+                        self.rect.right = i.rect.left 
+                
                         #self.rect.midright = i.rect.midleft
                         #self.rect.bottomright = i.rect.bottomleft
 
@@ -143,6 +155,7 @@ class SpriteObject(pg.sprite.Sprite):
                     
                     elif abs(self.rect.top - i.rect.bottom) <= collision_tolerance:
                         self.rect.top = i.rect.bottom
+
                         #self.rect.midtop = i.rect.midbottom
                         #self.rect.topleft = i.rect.bottomleft
                     
@@ -150,12 +163,12 @@ class SpriteObject(pg.sprite.Sprite):
                         self.rect.bottom = i.rect.top
                         #self.rect.midbottom = i.rect.midtop
                         #self.rect.bottomleft = i.rect.topleft
-                        
+
+    # need to edit this function for grid collisions         
               
         else:
-            self.test = pg.draw.rect(self.original_image, BLUE, self.original_image.get_rect(),3)        
+            self.test = pg.draw.rect(self.original_image, BLUE, self.original_image.get_rect(),5)        
             #self.test = pg.draw.rect(self.original_image, GRAY, self.original_image.get_rect(),3)
-        #print(test)
 
 
 
@@ -165,31 +178,49 @@ class SpriteObject(pg.sprite.Sprite):
             if self != i and self.rect.colliderect(i.rect):
                 print(i.name)
 
-
-
+    
 
     def update(self, event_list):
         SpriteObject.wall_collision_check(self)
         SpriteObject.collision_check(self)
         self.drag.movement_update(event_list) 
-        SpriteObject.word_checker(self)
+        #SpriteObject.word_checker(self)
         Gameplay.check_word()
         
-        
     
-
         
-  
+class Tiles():
 
-            
+    def create_array():
+     
+        for row in range (10):
+            grid.append([])
+            for column in range(10):
+                grid[row].append(0)
+        print(grid[row][column])
+    
+    def draw_grid():  
+        for row in range(10):
+            for column in range(10):
+                pg.draw.rect(SCREEN,
+                             WHITE,
+                             [(MARGIN + cell_w) * column + MARGIN,
+                              (MARGIN + cell_h) * row + MARGIN,
+                              cell_w,
+                              cell_h])
 
+
+
+    
+Tiles.create_array()
 
 
 class Gameplay:
-    def __init__(self,rect) :
+    def __init__(self,rect):
         self.rect = rect
         self.dragging = False
         self.rel_pos = (0,0)
+
                        
     def movement_update(self, event_list):
         for event in event_list:
@@ -197,13 +228,49 @@ class Gameplay:
             if event.type == pg.MOUSEBUTTONDOWN:
                 self.dragging = self.rect.collidepoint(event.pos)
                 self.rel_pos = event.pos[0] - self.rect.x, event.pos[1] - self.rect.y
-
+           
+                
+               
             elif event.type == pg.MOUSEMOTION and self.dragging:
                 self.rect.topleft = event.pos[0] - self.rel_pos[0], event.pos[1] - self.rel_pos[1]
-            
+                #self.rect = Tiles.get_grid_mouse()
+                
+
+                    
                 
             elif event.type == pg.MOUSEBUTTONUP:
+               
+    
+                x, y = pg.mouse.get_pos()
+
+                ix = x // MARGIN2
+                iy = y // MARGIN2
+
+                #self.rect.x, self.rect.y = ix * MARGIN2, iy * MARGIN2
+                #self.dragging.x, self.dragging.y = ix * MARGIN2, iy * MARGIN2
+
+                
+                
+                
+                #x,y = pos[0]//(cell_h + MARGIN), pos[1]//(cell_w + MARGIN)
+                
+
+                
+                self.rect.x = ((round(self.rect.x/MARGIN2))*MARGIN2)
+                self.rect.y = ((round(self.rect.y/MARGIN2))*MARGIN2)
+                print(self.rect.y)
+                print(self.rect.x)
+                
                 self.dragging = False
+            
+
+
+                #if self.:
+                 #  print(self.rel_pos[0]) 
+               # print(self.rel_pos)
+
+                
+                
             
     def reset_game():
         pass
@@ -217,45 +284,44 @@ class Gameplay:
 
 group = pg.sprite.Group([
 
-    SpriteObject(80, 500, LETTER1, LETTER_LIST[0]),
-    SpriteObject(140,500, LETTER2, LETTER_LIST[1]),
-    SpriteObject(200,500, LETTER3, LETTER_LIST[2]),
-    SpriteObject(260,500, LETTER4, LETTER_LIST[3]),
-    SpriteObject(320,500, LETTER5, LETTER_LIST[4]),
-    SpriteObject(380,500, LETTER6, LETTER_LIST[5]),
-    SpriteObject(440,500, LETTER7,LETTER_LIST[6]),
-    SpriteObject(500,500, LETTER8, LETTER_LIST[7]),
-    SpriteObject(560,500, LETTER9, LETTER_LIST[8]),
-    SpriteObject(620,500, LETTER10, LETTER_LIST[9]),
-    SpriteObject(680,500, LETTER11, LETTER_LIST[10]),
-    SpriteObject(740,500, LETTER12, LETTER_LIST[11])
+    SpriteObject(80, 600, LETTER1, LETTER_LIST[0]),
+    SpriteObject(140,600, LETTER2, LETTER_LIST[1]),
+    SpriteObject(200,600, LETTER3, LETTER_LIST[2]),
+    SpriteObject(260,600, LETTER4, LETTER_LIST[3]),
+    SpriteObject(320,600, LETTER5, LETTER_LIST[4]),
+    SpriteObject(380,600, LETTER6, LETTER_LIST[5]),
+    SpriteObject(440,600, LETTER7, LETTER_LIST[6]),
+    SpriteObject(500,600, LETTER8, LETTER_LIST[7]),
+    SpriteObject(560,600, LETTER9, LETTER_LIST[8]),
+    SpriteObject(620,600, LETTER10, LETTER_LIST[9]),
+    SpriteObject(680,600, LETTER11, LETTER_LIST[10]),
+    SpriteObject(740,600, LETTER12, LETTER_LIST[11])
 ])
 
-       
 
 
 
 def main():
     running = True
     
-    print(LETTER_LIST)
-    
-    clock = pg.time.Clock()
-    
+    #print(LETTER_LIST)
+
+
     while running:
+        
         
         event_list = pg.event.get()
         for event in event_list:
             if event.type == pg.QUIT:
                 running = False
-        group.update(event_list)
-
-        SCREEN.fill(GRAY)
+        #group.update(event_list)
+        #SCREEN.blit(bg,(0,0))
+        SCREEN.fill(0)
         SCREEN.blit(bg,(0,0))
-        group.draw(SCREEN)
-        pg.display.flip()
-
-                
+        Tiles.draw_grid()
+        group.update(event_list)
+        group.draw(SCREEN)    
+        pg.display.flip()        
 
 main()
 
