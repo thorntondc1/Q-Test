@@ -1,4 +1,5 @@
 import os
+from array import *
 import pygame as pg
 import random
 import urllib.request
@@ -10,7 +11,7 @@ pg.font.init()
 WIDTH = 800
 HEIGHT = 700
 MARGIN = 2  #distance between grid squares 
-MARGIN2 = 525 // 10 #~ width of the grid // by the # of squares 
+MARGIN2 = 525 // 10 # ~width of the grid // by the # of squares 
 
 cell_w = 50
 cell_h = 50
@@ -48,23 +49,13 @@ BLOCK_LIST=[BLOCK1,BLOCK2,BLOCK3,BLOCK4,BLOCK5,BLOCK6,
 
 grid = []
 
-grid2 = [[0,0,0,0,0,0,0,0,0,0],
-         [0,0,0,0,0,0,0,0,0,0],
-         [0,0,0,0,0,0,0,0,0,0],
-         [0,0,0,0,0,0,0,0,0,0],
-         [0,0,0,0,0,0,0,0,0,0],
-         [0,0,0,0,0,0,0,0,0,0],
-         [0,0,0,0,0,0,0,0,0,0],
-         [0,0,0,0,0,0,0,0,0,0],
-         [0,0,0,0,0,0,0,0,0,0],
-         [0,0,0,0,0,0,0,0,0,0]]
-# will remove grid2 eventually. Using for testing
 
 pg.init()
 
 
 SCREEN = pg.display.set_mode((WIDTH, HEIGHT))
 pg.display.set_caption("QLess-Test")
+
 
 
 
@@ -118,6 +109,7 @@ class SpriteObject(pg.sprite.Sprite):
         self.drag = Gameplay(self.rect)
 
 
+
     def wall_collision_check(self):
         if self.rect.right >= WIDTH:
             self.rect.right = WIDTH
@@ -135,11 +127,13 @@ class SpriteObject(pg.sprite.Sprite):
 
     def collision_check(self):
         collision_tolerance = 10
+       
         check_group = pg.sprite.Group([letter for letter in group if letter != self.rect])
         if pg.sprite.spritecollideany(self, check_group):
             self.test = pg.draw.rect(self.original_image, RED, self.original_image.get_rect(),3)
             for i in check_group:
                 if self.rect.colliderect(i):
+                    
                     if abs(self.rect.right - i.rect.left) <= collision_tolerance:
                         
                         self.rect.right = i.rect.left 
@@ -167,16 +161,24 @@ class SpriteObject(pg.sprite.Sprite):
     # need to edit this function for grid collisions         
               
         else:
-            self.test = pg.draw.rect(self.original_image, BLUE, self.original_image.get_rect(),5)        
+            self.test = pg.draw.rect(self.original_image, WHITE, self.original_image.get_rect(),5)        
             #self.test = pg.draw.rect(self.original_image, GRAY, self.original_image.get_rect(),3)
 
-
+    def block_update(x,y):
+        pass
 
     
     def word_checker(self):
+        block_pos = (0,0)
+
+            #if self != i and self.rect.colliderect(i.rect):
+             #   print(i.name)
         for i in group:
-            if self != i and self.rect.colliderect(i.rect):
-                print(i.name)
+
+            if i.rect.x < 4 and i.rect.y < 4:
+
+                print("true")
+        
 
     
 
@@ -193,26 +195,31 @@ class Tiles():
 
     def create_array():
      
-        for row in range (10):
+        for row in range (11):
             grid.append([])
-            for column in range(10):
+            for column in range(11):
                 grid[row].append(0)
         print(grid[row][column])
     
     def draw_grid():  
-        for row in range(10):
-            for column in range(10):
+        for row in range(11):
+            for column in range(11):
                 pg.draw.rect(SCREEN,
                              WHITE,
                              [(MARGIN + cell_w) * column + MARGIN,
                               (MARGIN + cell_h) * row + MARGIN,
                               cell_w,
                               cell_h])
+    
+    def tile_update(x,y,name):
+        grid[x][y] = name 
+        print(grid)
+        
 
 
 
     
-Tiles.create_array()
+
 
 
 class Gameplay:
@@ -220,6 +227,7 @@ class Gameplay:
         self.rect = rect
         self.dragging = False
         self.rel_pos = (0,0)
+        self.grid_pos = (0,0)
 
                        
     def movement_update(self, event_list):
@@ -239,36 +247,31 @@ class Gameplay:
                     
                 
             elif event.type == pg.MOUSEBUTTONUP:
-               
-    
-                x, y = pg.mouse.get_pos()
+                pos = pg.mouse.get_pos()
+              
+              
+                x2,y2 = pos[0]//(cell_h + MARGIN), pos[1]//(cell_w + MARGIN)
+                
+                for i in group:
+                    if i.rect.collidepoint(pos):
+                        Tiles.tile_update(x2,y2,i.name)
+                        print(i.name)
 
-                ix = x // MARGIN2
-                iy = y // MARGIN2
-
-                #self.rect.x, self.rect.y = ix * MARGIN2, iy * MARGIN2
-                #self.dragging.x, self.dragging.y = ix * MARGIN2, iy * MARGIN2
-
-                
-                
-                
-                #x,y = pos[0]//(cell_h + MARGIN), pos[1]//(cell_w + MARGIN)
-                
 
                 
                 self.rect.x = ((round(self.rect.x/MARGIN2))*MARGIN2)
                 self.rect.y = ((round(self.rect.y/MARGIN2))*MARGIN2)
-                print(self.rect.y)
-                print(self.rect.x)
+
+
+                #instead, check for each tiles location and if in grid, place position 
+
+                
+                if self.grid_pos[0] < 11 and self.grid_pos[1] < 11:
+                     #print(self.name)
+                     print("True")
                 
                 self.dragging = False
             
-
-
-                #if self.:
-                 #  print(self.rel_pos[0]) 
-               # print(self.rel_pos)
-
                 
                 
             
@@ -298,7 +301,7 @@ group = pg.sprite.Group([
     SpriteObject(740,600, LETTER12, LETTER_LIST[11])
 ])
 
-
+Tiles.create_array()
 
 
 def main():
@@ -318,6 +321,7 @@ def main():
         #SCREEN.blit(bg,(0,0))
         SCREEN.fill(0)
         SCREEN.blit(bg,(0,0))
+
         Tiles.draw_grid()
         group.update(event_list)
         group.draw(SCREEN)    
