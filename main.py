@@ -164,21 +164,6 @@ class SpriteObject(pg.sprite.Sprite):
             self.test = pg.draw.rect(self.original_image, WHITE, self.original_image.get_rect(),5)        
             #self.test = pg.draw.rect(self.original_image, GRAY, self.original_image.get_rect(),3)
 
-    def block_update(x,y):
-        pass
-
-    
-    def word_checker(self):
-        block_pos = (0,0)
-
-            #if self != i and self.rect.colliderect(i.rect):
-             #   print(i.name)
-        for i in group:
-
-            if i.rect.x < 4 and i.rect.y < 4:
-
-                print("true")
-        
 
     
 
@@ -186,20 +171,19 @@ class SpriteObject(pg.sprite.Sprite):
         SpriteObject.wall_collision_check(self)
         SpriteObject.collision_check(self)
         self.drag.movement_update(event_list) 
-        #SpriteObject.word_checker(self)
         Gameplay.check_word()
         
     
         
 class Tiles():
-
     def create_array():
-     
         for row in range (11):
             grid.append([])
             for column in range(11):
                 grid[row].append(0)
-        print(grid[row][column])
+        #print(grid[row][column])
+        #print(grid)
+        #print("break")
     
     def draw_grid():  
         for row in range(11):
@@ -214,9 +198,12 @@ class Tiles():
     def tile_update(x,y,name):
         grid[x][y] = name 
         print(grid)
+        print("update break")
+    
+    
         
 
-
+#Tiles.create_array()
 
     
 
@@ -252,28 +239,31 @@ class Gameplay:
               
                 x2,y2 = pos[0]//(cell_h + MARGIN), pos[1]//(cell_w + MARGIN)
                 
-                for i in group:
-                    if i.rect.collidepoint(pos):
-                        Tiles.tile_update(x2,y2,i.name)
-                        print(i.name)
+              
 
 
                 
                 self.rect.x = ((round(self.rect.x/MARGIN2))*MARGIN2)
                 self.rect.y = ((round(self.rect.y/MARGIN2))*MARGIN2)
-
-
-                #instead, check for each tiles location and if in grid, place position 
-
-                
-                if self.grid_pos[0] < 11 and self.grid_pos[1] < 11:
-                     #print(self.name)
-                     print("True")
+                #this is what causes the blocks to snap on click
                 
                 self.dragging = False
             
                 
-                
+    def check_location():
+
+        Tiles.create_array()
+        #reset array
+        for i in group:
+            i.x, i.y = i.rect.x//(cell_h + MARGIN), i.rect.y//(cell_w + MARGIN)
+            #print(i.x,i.y, i.name)
+            if i.x <=10 and i.y <= 10:
+                Tiles.tile_update(i.x,i.y,i.name)
+            #write to array
+            else:
+                pass
+            
+
             
     def reset_game():
         pass
@@ -303,7 +293,6 @@ group = pg.sprite.Group([
 
 Tiles.create_array()
 
-
 def main():
     running = True
     
@@ -318,11 +307,14 @@ def main():
             if event.type == pg.QUIT:
                 running = False
         #group.update(event_list)
-        #SCREEN.blit(bg,(0,0))
+        SCREEN.blit(bg,(0,0))
         SCREEN.fill(0)
         SCREEN.blit(bg,(0,0))
-
+        #Tiles.create_array()
+        
+        Gameplay.check_location()
         Tiles.draw_grid()
+        grid.clear()
         group.update(event_list)
         group.draw(SCREEN)    
         pg.display.flip()        
