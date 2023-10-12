@@ -1,9 +1,9 @@
 import os
-from array import *
+#from array import *
 import pygame as pg
 import random
-import urllib.request
-from bs4 import BeautifulSoup
+import enchant
+
 
 pg.font.init()
 
@@ -49,6 +49,7 @@ BLOCK_LIST=[BLOCK1,BLOCK2,BLOCK3,BLOCK4,BLOCK5,BLOCK6,
 
 grid = []
 
+d = enchant.Dict("en_US")
 
 pg.init()
 
@@ -171,7 +172,6 @@ class SpriteObject(pg.sprite.Sprite):
         SpriteObject.wall_collision_check(self)
         SpriteObject.collision_check(self)
         self.drag.movement_update(event_list) 
-        Gameplay.check_word()
         
     
         
@@ -197,15 +197,8 @@ class Tiles():
     
     def tile_update(x,y,name):
         grid[x][y] = name 
-        print(grid)
-        print("update break")
-    
-    
-        
-
-#Tiles.create_array()
-
-    
+        #print(grid)
+        #print("update break")
 
 
 
@@ -224,25 +217,17 @@ class Gameplay:
                 self.dragging = self.rect.collidepoint(event.pos)
                 self.rel_pos = event.pos[0] - self.rect.x, event.pos[1] - self.rect.y
            
-                
+
                
             elif event.type == pg.MOUSEMOTION and self.dragging:
                 self.rect.topleft = event.pos[0] - self.rel_pos[0], event.pos[1] - self.rel_pos[1]
                 #self.rect = Tiles.get_grid_mouse()
                 
-
-                    
-                
             elif event.type == pg.MOUSEBUTTONUP:
                 pos = pg.mouse.get_pos()
               
-              
                 x2,y2 = pos[0]//(cell_h + MARGIN), pos[1]//(cell_w + MARGIN)
-                
-              
-
-
-                
+         
                 self.rect.x = ((round(self.rect.x/MARGIN2))*MARGIN2)
                 self.rect.y = ((round(self.rect.y/MARGIN2))*MARGIN2)
                 #this is what causes the blocks to snap on click
@@ -262,6 +247,7 @@ class Gameplay:
             #write to array
             else:
                 pass
+        
             
 
             
@@ -271,27 +257,82 @@ class Gameplay:
     def win_condition_check():
         pass
 
-    def check_word():
+    def check_word(word):
+
+        #word = ""
+        
+        if len(word) >= 3 and (d.check(word)):
+            print("True")
+
+    def check_horizontal():
         pass
+        
+
+    def check_vertical():
+        h = []
+        num = 0
+        for n in range (-1,10,1):
+            numtest = grid[n]
+            numtest1 = ''.join(str(i) for i in numtest)
+            for i in range(len(numtest1)-1):
+                current_char = numtest1[i]
+                next_char = numtest1[i+1]
+                last_char = numtest1[i-1]
+                if current_char.isalpha() and next_char.isalpha() or last_char.isalpha() and current_char.isalpha():
+                    h.append(current_char)
+            word1 = ''.join(h)
+            Gameplay.check_word(word1)
+            n += 1 
+
+
+    def grab_word():
+        h = []
+        wordtest1 = grid[1]
+        #print(wordtest1)
+    
+        wordtest2 = ''.join(str(i) for i in wordtest1)
+        #print(wordtest2)
+
+        for i in range(len(wordtest2)-1):
+            current_char = wordtest2[i]
+            next_char = wordtest2[i+1]
+            last_char = wordtest2[i-1]
+            if current_char.isalpha() and next_char.isalpha() or last_char.isalpha() and current_char.isalpha():
+                h.append(current_char)
+        word1 = ''.join(h)
+        Gameplay.check_word(word1)
+        #print(word1)
+
+
+        #get every column of letters
+        #place in list 
+        #run list through check_word
+        #do same for rows 
+
+    
+
+   
+
 
 
 group = pg.sprite.Group([
 
-    SpriteObject(80, 600, LETTER1, LETTER_LIST[0]),
-    SpriteObject(140,600, LETTER2, LETTER_LIST[1]),
-    SpriteObject(200,600, LETTER3, LETTER_LIST[2]),
-    SpriteObject(260,600, LETTER4, LETTER_LIST[3]),
-    SpriteObject(320,600, LETTER5, LETTER_LIST[4]),
-    SpriteObject(380,600, LETTER6, LETTER_LIST[5]),
-    SpriteObject(440,600, LETTER7, LETTER_LIST[6]),
-    SpriteObject(500,600, LETTER8, LETTER_LIST[7]),
-    SpriteObject(560,600, LETTER9, LETTER_LIST[8]),
-    SpriteObject(620,600, LETTER10, LETTER_LIST[9]),
-    SpriteObject(680,600, LETTER11, LETTER_LIST[10]),
-    SpriteObject(740,600, LETTER12, LETTER_LIST[11])
+    SpriteObject(80, 625, LETTER1, LETTER_LIST[0]),
+    SpriteObject(140,625, LETTER2, LETTER_LIST[1]),
+    SpriteObject(200,625, LETTER3, LETTER_LIST[2]),
+    SpriteObject(260,625, LETTER4, LETTER_LIST[3]),
+    SpriteObject(320,625, LETTER5, LETTER_LIST[4]),
+    SpriteObject(380,625, LETTER6, LETTER_LIST[5]),
+    SpriteObject(440,625, LETTER7, LETTER_LIST[6]),
+    SpriteObject(500,625, LETTER8, LETTER_LIST[7]),
+    SpriteObject(560,625, LETTER9, LETTER_LIST[8]),
+    SpriteObject(620,625, LETTER10, LETTER_LIST[9]),
+    SpriteObject(680,625, LETTER11, LETTER_LIST[10]),
+    SpriteObject(740,625, LETTER12, LETTER_LIST[11])
 ])
 
 Tiles.create_array()
+Gameplay.grab_word()
 
 def main():
     running = True
@@ -313,6 +354,8 @@ def main():
         #Tiles.create_array()
         
         Gameplay.check_location()
+        #Gameplay.grab_word()
+        Gameplay.check_vertical()
         Tiles.draw_grid()
         grid.clear()
         group.update(event_list)
